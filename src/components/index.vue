@@ -90,6 +90,27 @@
     <el-button type="primary" @click="dialogVisible1 = false">确 定</el-button>
   </span>
 </el-dialog>
+<!-- 遮罩层 -->
+<div class="modal" style="display: none;">
+       <div class="form-wrapper">
+         <div class="close-login"><img src="../assets/close.png" alt=""></div>
+    <div class="header">
+      登陆网易云音乐
+    </div>
+    <div class="input-wrapper">
+      <div class="border-wrapper">
+        <input type="text" name="username" placeholder="手机号码/绑定邮箱" class="border-item">
+      </div>
+      <div class="border-wrapper">
+        <input type="password" name="password" placeholder="请输入密码..." class="border-item">
+      </div>
+    </div>
+    <div class="action">
+      <div class="btn">login</div>
+    </div>
+  </div>
+
+</div>
     </div>
 </template>
 
@@ -128,7 +149,6 @@ export default {
 </script>
 
 <style>
-
 .test{
   background-color: #000;
   margin-top: 120px;
@@ -137,7 +157,7 @@ export default {
   height: 500px;
   margin-top: 120px;
 	filter: blur(0.1px);
- background-color:  rgba(255, 2555, 255,0.7);
+ background-color:  rgba(255, 255, 255,0.7);
  border-radius: 25px;
  box-shadow: 12px 12px 30px rgba(48, 57, 82,0.7);
 }
@@ -177,6 +197,108 @@ export default {
   color: #000;
   font-size: 16px;
   margin-top: 100px;
+}
+.modal{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0,0.5);
+}
+.form-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 300px;
+    background-color: rgba(255, 255, 255,0.7);
+    color: #000;
+    border-radius: 15px;
+    padding: 50px;
+}
+
+.form-wrapper .header {
+    text-align: center;
+    font-size: 25px;
+    line-height: 100px;
+   color: #000; 
+}
+
+.form-wrapper .input-wrapper input {
+    background-color: rgba(255, 255, 255,0.7);
+    border: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 15px;
+    color: #fff;
+    outline: none;
+}
+.form-wrapper .input-wrapper input::placeholder {
+    text-transform: uppercase;
+}
+
+.form-wrapper .input-wrapper .border-wrapper {
+    background-image: linear-gradient(to right,#e8198b,#0eb4dd);
+    width: 100%;
+    height: 50px;
+    margin-bottom: 20px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-wrapper .input-wrapper .border-wrapper .border-item {
+    height: calc(100% - 4px);
+    width: calc(100% - 4px);
+    border-radius: 30px;
+}
+.form-wrapper .action {
+    display: flex;
+    justify-content: center;
+}
+.form-wrapper .action .btn {
+    width: 60%;
+    text-transform: uppercase;
+    border: 2px solid #0e92b3;
+    text-align: center;
+    line-height: 50px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: .4s;
+}
+
+.form-wrapper .action .btn:hover{
+    /* background-image: linear-gradient(to right,#0e92b3,#0eb4dd); */
+    background-color: rgba(99, 205, 218,0.6);
+}
+
+.form-wrapper .icon-wrapper {
+    text-align: center;
+    width: 60%;
+    margin: 0 auto;
+    margin-top: 20px;
+    border-top: 1px dashed rgb(146, 146, 146);
+    padding: 20px;
+}
+
+.form-wrapper .icon-wrapper i {
+    font-size: 20px;
+    color: rgb(187, 187, 187);
+    cursor: pointer;
+    border: 1px solid #fff;
+    padding: 5px;
+    border-radius: 20px;
+}
+.close-login{
+  position: fixed;
+  top: -8px;
+  right: -8px;
+}
+.close-login img{
+  width: 20px;
+  height: 20px;
 }
 
 </style>
