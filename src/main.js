@@ -10,13 +10,15 @@ import 'element-ui/lib/theme-chalk/index.css';
 import 'element-ui/lib/theme-chalk/display.css';
 import Vuex from 'vuex'
 import store from './stores'
-import './assets/css/index.css'
+import Cookies from 'js-cookie'
 
 
 Vue.use(Vuex)
 Vue.use(ElementUI);
 Vue.use(VueAxios, axios)
+Vue.prototype.$axios = axios
 axios.defaults.baseURL='https://musicapi.citrons.cn/'
+axios.defaults.withCredentials = true
 
 
 Vue.config.productionTip = false

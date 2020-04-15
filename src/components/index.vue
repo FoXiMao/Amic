@@ -11,16 +11,19 @@
           <el-col  :span="9" :offset="3">
             <div class="wapper-panl">
             <el-card class="panl" shadow="always">
-                Citrons,欢迎使用网易云音乐一键打卡程序 <el-button type="text" @click="dialogVisible = true">About AMCI</el-button>
+                {{this.nickname}},欢迎使用网易云音乐一键打卡程序 
        </el-card>
        <div>
-         <el-button class="panl-button" type="danger">签到</el-button>
+         <el-button @click="qiandao" class="panl-button" type="danger">签到</el-button>
          </div>
          <div>
            <el-button class="panl-button" @click="dialogVisible1 = true" type="danger">听歌打卡</el-button>
            </div>
            <div>
-           <el-button class="panl-button" type="danger">登陆</el-button>
+           <el-button @click="chageLoginShow" v-show="loginButtonShow" class="panl-button" type="danger">登陆</el-button>
+           </div>
+           <div>
+             <el-button @click="LoginOut" v-show="loginOutShow" class="panl-button" type="danger">注销登陆</el-button>
            </div>
            <br>
           <el-divider ></el-divider>
@@ -30,18 +33,18 @@
           <el-col  :span="7" :offset="2">
             <div class="wapper-panl">
                <el-card class="panl" shadow="always">
-                当前登陆用户信息
+                当前登陆用户信息&nbsp;|&nbsp;<el-button type="text" @click="dialogVisible = true">About AMCI</el-button>
        </el-card>
        <div class="user-info">
-       userId：374187305
+       userId：{{this.userId}}
           <el-divider></el-divider>
-       昵称：Citrons柠檬草
+       昵称：{{this.nickname}}
           <el-divider></el-divider>
-       等级：8
+       等级：{{this.level}}
           <el-divider></el-divider>
-       听歌数量：3339
+       听歌数量：{{this.listenSongs}}
           <el-divider></el-divider>
-       个性签名：不知道你的人，还以为你很开心哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇 
+       个性签名：{{this.signature}}
          <el-divider></el-divider>
        </div>
               </div>
@@ -91,22 +94,22 @@
   </span>
 </el-dialog>
 <!-- 遮罩层 -->
-<div class="modal" style="display: none;">
+ <div class="modal" v-show="loginShow" ><!--style="display: none;" -->
        <div class="form-wrapper">
-         <div class="close-login"><img src="../assets/close.png" alt=""></div>
+         <div class="close-login"><img @click="closeLoginShow" src="../assets/close.png" alt=""></div>
     <div class="header">
       登陆网易云音乐
     </div>
     <div class="input-wrapper">
       <div class="border-wrapper">
-        <input type="text" name="username" placeholder="手机号码/绑定邮箱" class="border-item">
+        <input v-model="cellphone" type="text" name="username" placeholder="手机号码/绑定邮箱" class="border-item">
       </div>
       <div class="border-wrapper">
-        <input type="password" name="password" placeholder="请输入密码..." class="border-item">
+        <input v-model="password" type="password" name="password" placeholder="请输入密码..." class="border-item">
       </div>
     </div>
     <div class="action">
-      <div class="btn">login</div>
+      <div @click="login"  v-loading.fullscreen.lock="fullscreenLoading" class="btn">login</div>
     </div>
   </div>
 
@@ -115,35 +118,118 @@
 </template>
 
 <script>
+import {mapState,mapGetters, mapMutations} from 'vuex'
 export default {
     data() {
         return {
- dialogVisible: false,
- dialogVisible1:false,
- checkList: ['选中且禁用','复选框 A'],
+            dialogVisible: false,//About弹窗状态
+            dialogVisible1: false,//选择播放内容状态
+            checkList: ['选中且禁用','复选框 A'],
+            cellphone: '',
+            password: '',
+            loginShow: false,//登陆弹窗状态
+            fullscreenLoading: false,//加载状态
+            loginButtonShow: true,
+            loginOutShow: false,
         }
     },
     methods: {
- handleClose(done) {
-        this.$confirm('确认关闭？')
-          .then(_ => {
-            done();
-          })
-          .catch(_ => {});
-      },
-       handleClose1(done) {
-        this.$confirm('确认关闭？')
-          .then(_ => {
-            done();
-          })
-          .catch(_ => {});
-      }
+              handleClose(done) {
+                      this.$confirm('确认关闭？')
+                        .then(_ => {
+                          done();
+                        })
+                        .catch(_ => {});
+                    },
+              handleClose1(done) {
+                this.$confirm('确认关闭？')
+                  .then(_ => {
+                    done();
+                  })
+                  .catch(_ => {});
+              },
+            // 点击显示登陆弹窗
+              chageLoginShow(){
+                 this.loginShow = true
+              },
+
+              //点击关闭登陆弹窗
+              closeLoginShow(){
+
+                this.loginShow = false
+
+              },
+              // 登陆
+              login(){
+
+                //以数组的方式传参，mutation需要用payload取得参数
+                this.$store.commit('login',{cellphone :this.cellphone,password: this.password})
+                this.$store.dispatch('getInfoAsync')
+                this.loginShow = false
+                 this.loginButtonShow = false
+                        this.loginOutShow = true
+                this.fullscreenLoading = true;
+                setTimeout(() => {
+                  this.fullscreenLoading = false;
+                }, 1000);
+            
+              },
+              //登出
+              LoginOut(){
+               
+                 this.fullscreenLoading = true;
+                setTimeout(() => {
+                  this.$store.commit('LoginOut'),
+                  this.fullscreenLoading = false;
+                }, 1000);
+                this.$axios.post('/login/refresh').then({
+
+                })
+                     this.loginButtonShow = true
+                     this.loginOutShow = false  
+                
+              },
+              getCookie(){
+                // this.$store.commit('getCookie')
+               var locl = JSON.parse(localStorage.getItem("accessToken"))
+              //  console.log()
+                 if(locl[0].userId !== "请先登陆" ){
+                        this.loginButtonShow = false
+                        this.loginOutShow = true
+                       // console.log(this.$store.state.cookie)
+                      }else{
+                        this.loginButtonShow = true
+                        this.loginOutShow = false
+                      }
+              },
+              qiandao(){
+                this.$axios.post('/daily_signin?type=0').then(
+                  res =>{
+                    if(res.data.code === 200){
+                      console.log('签到成功')
+                    }
+                  }
+                ).catch(
+                  (error) => {
+                    if(error.request.status===400){
+                  console.log("重复签到");
+               }else if(error.request.status===301){
+                 console.log("未登录");
+               }else{
+                 console.log(error.request.status);
+               }
+                  }
+                )
+              }
     },
     computed: {
-
+      ...mapMutations([]),
+      ...mapGetters([]),
+      ...mapState(['userId','nickname','level','listenSongs','signature']),
     },
     created() {
-
+      this.$store.commit('setUserInfo');
+this.getCookie();
     }
 }
 </script>
@@ -165,6 +251,9 @@ export default {
  text-align: center;
  border-radius:25px 25px 0 0;
  color: rgba(225, 95, 65,1.0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .panl-button{
   width: 80%;
@@ -173,6 +262,7 @@ export default {
   margin-top: 50px;
   height: 50px;
 }
+
 .song-button{
   width: 80%;
   text-align: center;
@@ -185,6 +275,8 @@ export default {
   top: 50%;
   transform: translate(-50%,50%);
   height: 50px;
+   box-shadow: 15px 15px 15px rgba(48, 57, 82,0.7);
+   border-radius: 5px;
 }
 .user-info{
   padding: 50px  35px 0 35px;
@@ -205,6 +297,7 @@ export default {
   top: 0;
   left: 0;
   background-color: rgba(0, 0, 0,0.5);
+
 }
 .form-wrapper {
     position: absolute;
@@ -299,6 +392,7 @@ export default {
 .close-login img{
   width: 20px;
   height: 20px;
+  cursor:pointer;
 }
 
 </style>
