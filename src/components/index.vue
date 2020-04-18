@@ -125,8 +125,8 @@ export default {
             dialogVisible: false,//About弹窗状态
             dialogVisible1: false,//选择播放内容状态
             checkList: ['选中且禁用','复选框 A'],
-            cellphone: '',
-            password: '',
+            cellphone: null,
+            password: null,
             loginShow: false,//登陆弹窗状态
             fullscreenLoading: false,//加载状态
             loginButtonShow: true,
@@ -161,62 +161,133 @@ export default {
               },
               // 登陆
               login(){
+                //不允许输入框为控股
+                if(this.cellphone !== '' && this.password !== ''){
+                // this.$store.commit('login',{cellphone :this.cellphone,password: this.password})
+                // this.$store.dispatch('getInfoAsync')
+                 this.axios.post( "/login/cellphone?phone="+this.cellphone+"&password="+this.password).then(
+               res=> {
+                // console.log(res.data.profile.userId)
+                //如果成功则将返回数据存储在state中
+                 if(res.data.code === 200){
+                  this.token = res.data.token
+                  window.localStorage.setItem('token',res.data.token);
+                  window.localStorage.setItem('userId',res.data.profile.userId);
 
-                //以数组的方式传参，mutation需要用payload取得参数
-                this.$store.commit('login',{cellphone :this.cellphone,password: this.password})
-                this.$store.dispatch('getInfoAsync')
+                //  console.log(this.state.userId)
                 this.loginShow = false
-                 this.loginButtonShow = false
-                        this.loginOutShow = true
-                this.fullscreenLoading = true;
+                 this.fullscreenLoading = true;
                 setTimeout(() => {
                   this.fullscreenLoading = false;
                 }, 1000);
-            
+                this.loginButtonShow = false
+                this.loginOutShow = true
+                 this.$store.commit('setLoginIn')
+                 this.$store.commit('getUserInfo')
+                 const user =[{
+                   password:this.password,
+                   cellphone:this.cellphone
+                 }]
+                 localStorage.removeItem('userInfo')
+                localStorage.setItem('userInfo',JSON.stringify(user) )
+                 }else{
+                   //否则打印错误信息
+                   
+                     this.$message.error('账号或密码错误')
+                 }
+                 
+                   
+                }
+                //400和501状态码捕捉
+              ).catch((error)=>{
+               //console.log(error.request.status);
+               if(error.request.status===400){
+                  // console.log("输入类型有误");
+                  this.$message({
+                    message: '输入类型有误',
+                    type: 'warning',
+                    center: true
+                  });
+                
+               }else if(error.request.status===501){
+                //  console.log("账号错误");
+                 this.$message.error('账号错误')
+               }else{
+                //  console.log(error.request.status);
+                 this.$message(error.request.status)
+               }
+            }
+              )
+                // this.loginShow = false
+                // this.loginButtonShow = false
+                // this.loginOutShow = true        
+                   }else{
+                     this.$message({
+          message: '账号或密码不能为空',
+          type: 'warning',
+          center: true
+        });
+                   }
+              
               },
               //登出
               LoginOut(){
-               
+                 this.$store.commit('LoginOut'),
                  this.fullscreenLoading = true;
                 setTimeout(() => {
-                  this.$store.commit('LoginOut'),
+                 
                   this.fullscreenLoading = false;
                 }, 1000);
-                this.$axios.post('/login/refresh').then({
-
-                })
+                
                      this.loginButtonShow = true
                      this.loginOutShow = false  
-                
+                    //  this.$store.commit('loginRefresh');
+                      // this.$store.commit('loginStatus');
+                    localStorage.removeItem('login')
               },
-              getCookie(){
-                // this.$store.commit('getCookie')
-               var locl = JSON.parse(localStorage.getItem("accessToken"))
-              //  console.log()
-                 if(locl[0].userId !== "请先登陆" ){
-                        this.loginButtonShow = false
-                        this.loginOutShow = true
-                       // console.log(this.$store.state.cookie)
-                      }else{
-                        this.loginButtonShow = true
-                        this.loginOutShow = false
-                      }
-              },
+               //检测账号登陆状态
+          loginStatus(state){
+            let locl = localStorage.getItem('login')
+            // console.log(locl)
+            if(locl === '0' || locl ===null){
+              // console.log('yes')
+                this.loginButtonShow = true
+                 this.loginOutShow = false
+            }else{
+              // console.log('no')
+               this.loginButtonShow = false
+               this.loginOutShow = true
+            }
+          },
+        
+      
               qiandao(){
                 this.$axios.post('/daily_signin?type=0').then(
                   res =>{
                     if(res.data.code === 200){
-                      console.log('签到成功')
+
+                      this.$message({
+          message: '签到成功',
+          type: 'success',
+          center: true
+        });
+                
                     }
                   }
                 ).catch(
                   (error) => {
                     if(error.request.status===400){
-                  console.log("重复签到");
+                   
+                   this.$message({
+          message: '重复签到',
+          type: 'warning',
+          center: true
+        });
                }else if(error.request.status===301){
-                 console.log("未登录");
+                
+                 this.$message.error('未登录')
                }else{
-                 console.log(error.request.status);
+                  window.alert(error.request.status)
                }
                   }
                 )
@@ -228,8 +299,10 @@ export default {
       ...mapState(['userId','nickname','level','listenSongs','signature']),
     },
     created() {
-      this.$store.commit('setUserInfo');
-this.getCookie();
+      // this.$store.commit('setUserInfo');
+this.loginStatus();
+this.$store.commit('loginRefresh');
+this.$store.commit('getInfo');
     }
 }
 </script>

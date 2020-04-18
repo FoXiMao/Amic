@@ -29,39 +29,24 @@ export default new Vuex.Store({
         },
         //Mutation 用于变更Store中的数据
         mutations : {
-          
-          //登陆账号
-          login(state,payload) {
-            axios.post( "/login/cellphone?phone="+payload.cellphone+"&password="+payload.password).then(
-               res=> {
-                // console.log(res.data.profile.userId)
-                 if(res.data.code === 200){
-                  state.userId = res.data.profile.userId
-                  state.token = res.data.token
-                  window.localStorage.setItem('token',res.data.token);
-                  window.localStorage.setItem('userId',res.data.profile.userId);
-                //  console.log(this.state.userId)
-                
-                 }else{
-                   console.log('账号或密码错误')
-                 }
-                 
-                   
-                }
-              ).catch((error)=>{
-               //console.log(error.request.status);
-               if(error.request.status===400){
-                  console.log("输入类型有误");
-               }else if(error.request.status===501){
-                 console.log("账号错误");
-               }else{
-                 console.log(error.request.status);
-               }
+          // 获取已登陆的用户信息
+          getInfo(state){
+            let locl = localStorage.getItem('userId')
+            if(locl !== null){
+              let userInfo = JSON.parse(localStorage.getItem("accessToken"))
+              state.userId =userInfo[0].userId
+              state.nickname =userInfo[0].nickname
+              state.level =userInfo[0].level
+              state.listenSongs =userInfo[0].listenSongs
+              state.signature =userInfo[0].signature
+
             }
-              )
           },
+          //获取Userd的信息
           getUserInfo(state){
-              axios.post("/user/detail?uid="+state.userId).then(
+            let locl = localStorage.getItem('userId')
+            state.userId = locl
+              axios.post("/user/detail?uid="+locl).then(
                 res => {
                  //  console.log(res.data)
                   state.nickname = res.data.profile.nickname
@@ -94,9 +79,10 @@ export default new Vuex.Store({
                 }
               )
           },
-          // setOutInfo(state){
-
-          // },
+          //设置登陆状态为未登陆
+          setLoginIn(){
+            localStorage.setItem('login','1' )
+          },
           setUserInfo(state){
             const obj = [{
               userId: state.userId,
@@ -110,9 +96,11 @@ export default new Vuex.Store({
               //将数组obj转换成json格式后存储到Local Storage中，并命名为accessToken
               localStorage.setItem('accessToken',JSON.stringify(obj) )
           },
+          // 退出账号
           LoginOut(state){
-            axios.post('/logout').then(
+            axios.get('/logout').then(
               res =>{
+                // console.log(res)
                  localStorage.removeItem('accessToken')
                  state.userId = '请先登录'
                  state.nickname = '请先登录'
@@ -122,9 +110,27 @@ export default new Vuex.Store({
                 //  console.log(state.userId)
                  localStorage.removeItem('userId')
                  localStorage.removeItem('token')
+                 localStorage.removeItem('user')
               }
             )
-          }
+          },
+          //刷新登陆状态
+          loginRefresh(state){
+            axios.post('/login/refresh').then(
+              res => {
+                // console.log(res)
+              }
+            ).catch(
+              (error) => {
+                if(error.request.status===301){
+                  console.log("未登陆");
+               }else{
+                 console.log(error.request.status);
+               }
+              }
+              )
+          },
+      
         
         },
         //Action用于处理异步任务
