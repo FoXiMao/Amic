@@ -25,7 +25,8 @@ export default new Vuex.Store({
     signature: '请先登陆',//用户个性签名
     followeds: '',//用户粉丝数量
     follows: '',//用户关注数量
-    cookie: '1'
+    cookie: '1',
+    likeId:null
   },
   //Mutation 用于变更Store中的数据
   mutations: {
@@ -33,12 +34,54 @@ export default new Vuex.Store({
       let locl1 = localStorage.getItem('login')
       if (locl1 === '1') {
         let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+        if(userInfo[0].loginFun === 'phone'){
         axios.post("/login/cellphone?phone=" + userInfo[0].cellphone + "&password=" + userInfo[0].password).then(
           res => {
-
-          }
-        )
+              
+            }
+          )
+        }else{
+          axios.post("/login?email=" + userInfo[0].email + "&password=" + userInfo[0].password).then(
+            res => {
+              
+              }
+            )
+        }
       }
+    },
+    getLikeId(state){
+      let locl = localStorage.getItem('userId')
+      axios.post('/user/playlist?uid='+locl).then(
+        res =>{
+
+          state.likeId = res.data.playlist[0].id
+          const likeID = [
+            {
+              likeId: state.likeId,
+            }
+          ];
+          localStorage.removeItem("likeId")
+              localStorage.setItem("likeId", JSON.stringify(likeID))
+        }
+      )
+    },
+    getDayList(){
+     axios.post('/recommend/songs').then(
+            res => {
+              this.dayList = res.data.recommend
+              this.dayLength =res.data.recommend.length
+              // console.log(this.dayList[0])
+            }
+          ) .catch(error => {
+              //console.log(error.request.status);
+              if (error.request.status === 301) {
+                // console.log("输入类型有误");
+                this.$message.error("未登陆");
+              } else {
+                //  console.log(error.request.status);
+                this.$message('未知错误，建议重新登陆');
+              }
+            })
     },
     // 获取已登陆的用户信息
     getInfo(state) {
@@ -122,6 +165,7 @@ export default new Vuex.Store({
           localStorage.removeItem('userId')
           localStorage.removeItem('token')
           localStorage.removeItem('user')
+          localStorage.removeItem('likeId')
         }
       )
     },
@@ -141,8 +185,16 @@ export default new Vuex.Store({
         }
       )
     },
-
-
+    // 存储cookie
+    setCookies(state){
+      let locl = localStorage.getItem('token')
+      Cookies.set('MUSIC_U', locl, { expires: 15 });
+      
+    },
+    // 删除cookie
+    delCookies(state){
+      Cookies.remove('MUSIC_U');
+    }
   },
   //Action用于处理异步任务
   actions: {
