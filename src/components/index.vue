@@ -2,22 +2,30 @@
   <div>
     <!-- logo -->
     <section>
+      <!-- 栅格居中排列 -->
       <el-row type="flex"  justify="center">
+        <!-- 栅格响应式 -->
         <el-col  :xs="20" :sm="18" :md="12" :lg="12" :xl="12">
           <img class="logo" src="../assets/logo-header.png" alt />
         </el-col>
+        <!-- /栅格响应式 -->
       </el-row>
+      <!-- /栅格居中排列 -->
     </section>
-    <section>
+    <!-- /logo -->
+          <!-- PC端用户页面 -->
+      <section>
+        <!-- 当屏幕尺寸在xs的时候隐藏 -->
       <el-row class="hidden-xs-only">
+        <!-- 占据9份,偏移三份 -->
         <el-col  :span="9" :offset="3">
           <div class="wapper-panl">
             <el-card class="panl" shadow="always">{{this.nickname}},欢迎使用网易云音乐一键打卡程序</el-card>
             <div>
-              <el-button @click="qiandao" class="panl-button" type="danger">签到</el-button>
+              <el-button @click="qiandao" class="panl-button" type="danger" :disabled=this.$store.state.disabledQ>签到</el-button>
             </div>
             <div>
-              <el-button class="panl-button" @click="dialogVisible1 = true" type="danger">听歌打卡</el-button>
+              <el-button class="panl-button" @click="dialogVisible1 = true" type="danger" :disabled=this.$store.state.disabledD>听歌打卡</el-button>
             </div>
             <div>
               <el-button
@@ -25,6 +33,7 @@
                 v-show="loginButtonShow"
                 class="panl-button"
                 type="danger"
+                :disabled=this.$store.state.disabledIn
               >登陆</el-button>
             </div>
             <div>
@@ -33,6 +42,7 @@
                 v-show="loginOutShow"
                 class="panl-button"
                 type="danger"
+                :disabled=this.$store.state.disabledOut
               >注销登陆</el-button>
             </div>
             <br />
@@ -64,16 +74,19 @@
           </div>
         </el-col>
       </el-row>
+      </section>
+
+      <section>
       <el-row type="flex"  justify="center">
 
         <el-col class="hidden-sm-and-up"  :span="18" >
           <div class="wapper-panl">
             <el-card class="panl" shadow="always">当前登陆用户:{{this.nickname}}</el-card>
             <div>
-              <el-button @click="qiandao" class="panl-button" type="danger">签到</el-button>
+              <el-button @click="qiandao" class="panl-button" type="danger" disabled>签到</el-button>
             </div>
             <div>
-              <el-button class="panl-button" @click="dialogVisible2 = true" type="danger">听歌打卡</el-button>
+              <el-button class="panl-button" @click="dialogVisible2 = true" type="danger" disabled>听歌打卡</el-button>
             </div>
             <div>
               <el-button
@@ -100,13 +113,7 @@
         </el-col>
       </el-row>
     </section>
-    <!-- <section>
-      <el-row>
-        <el-col :span="24">
-          <div class="footer">Copyright©Citrons博客 | 技术栈=>Vue+Vuex+node | 湘ICP备18012872号</div>
-        </el-col>
-      </el-row>
-    </section> -->
+   
     <!-- PC端关于弹窗 -->
     <el-dialog
       title="About AMIC"
@@ -128,7 +135,11 @@
       <el-divider></el-divider>
       <span>Q:为什么只刷了一部分或者没刷</span>
       <br />
-      <span>A:网易云数据一般下午两点更新</span>
+      <span>A:由于网易云对于高频IP限制的非常严格，所以会有部分请求失败，这是正常现象</span>
+       <el-divider></el-divider>
+       <span>Q:我能刷其他的收藏歌单吗？</span>
+      <br />
+      <span>A:如果有这个需求以后会增加这个功能 = =</span>
        <el-divider></el-divider>
       <span>开发者：Citrons</span>
       <el-divider></el-divider>
@@ -175,8 +186,10 @@
       :before-close="handleClose"
     >
       <el-checkbox-group v-model="checkList">
-        <el-checkbox label="日推歌曲"></el-checkbox>
-        <el-checkbox label="我喜欢的音乐"></el-checkbox>
+         <el-tooltip class="item" effect="dark" content="该功能接口不稳定，所以用作备选" placement="top-start">
+        <el-checkbox label="日推歌曲"></el-checkbox></el-tooltip>
+        <el-tooltip class="item" effect="dark" content="为了不影响您的听歌口味，此项必选，推荐歌曲备选" placement="top-start">
+        <el-checkbox label="我喜欢的音乐" disabled></el-checkbox></el-tooltip>
       </el-checkbox-group>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible1 = false">取 消</el-button>
@@ -256,6 +269,19 @@
     <el-button type="primary" v-loading.fullscreen.lock="fullscreenLoading" @click="login">登 陆</el-button>
   </span>
 </el-dialog>
+
+<!-- 开屏弹窗 -->
+<el-dialog
+  title="请注意"
+  :visible.sync="tost"
+  width="50%"
+  :before-close="handleClose">
+  &nbsp;&nbsp;&nbsp;&nbsp;由于网易服务器高频ip限制，同时也为了缓解我服务器的压力，于是我设置了缓存，缓存时间为2分钟，相同的请求会在2分钟内只向网易服务器发一次请求，<br>&nbsp;&nbsp;&nbsp;&nbsp;所以这里建议您操作一个账号之后等待3-4分钟再操作另外的账号，否则你全都是在为我在刷 = =<br> &nbsp;&nbsp;&nbsp;&nbsp;我觉得你们不会等着三四分钟，于是我设置操作一次后按钮呈禁用状态,两分钟后解禁
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="tost = false">取 消</el-button>
+    <el-button type="primary" @click="tost = false">确 定</el-button>
+  </span>
+</el-dialog>
   </div>
 </template>
 
@@ -290,9 +316,10 @@ export default {
       dialogVisible1: false, //选择播放内容状态
       dialogVisible2: false, //选择播放内容状态
       dialogVisible3: false,
+      tost: true,
       centerDialogVisible: false,
       centerDialogVisible1:false,
-      checkList: ["日推歌曲", "我喜欢的音乐"],
+      checkList: ["我喜欢的音乐"],
       cellphone: null,
       radio: '1',
       email:null,
@@ -307,7 +334,7 @@ export default {
       dayList:[],//日推歌曲数据
       likeList:[],//喜欢列表数据
       dayId:[],//s日推专辑ID
-      likeId:null//喜欢列表ID
+      code:null,
     };
   },
   methods: {
@@ -366,6 +393,173 @@ export default {
                      this.$store.commit('loginRefresh')
                      this.centerDialogVisible1 = false
                     this.$store.commit('setCookies')
+                     this.$store.commit('setI')
+                     this.$store.dispatch('setIAsync')
+              } else {
+                //否则打印错误信息
+
+                this.$message.error("账号或密码错误");
+              }
+            }
+            //400和501状态码捕捉
+          )
+          .catch(error => {
+            //console.log(error.request.status);
+            if (error.request.status === 400) {
+              // console.log("输入类型有误");
+              this.$message({
+                message: "输入类型有误",
+                type: "warning",
+                center: true
+              });
+            } else if (error.request.status === 501) {
+              //  console.log("账号错误");
+              this.$message.error("账号错误");
+            } else {
+              //  console.log(error.request.status);
+              this.$message(error.request.status);
+            }
+          });
+        // this.loginShow = false
+        // this.loginButtonShow = false
+        // this.loginOutShow = true
+      } else {
+        this.$message({
+          message: "账号或密码不能为空",
+          type: "warning",
+          center: true
+        });
+      }
+    }else if(this.radio === '2'){//邮箱登陆方法
+    
+    //  将输入框的值传给Email
+     this.email = this.cellphone
+      //不允许输入框为空
+      if (this.email !== "" && this.password !== "") {
+        // this.$store.commit('login',{cellphone :this.cellphone,password: this.password})
+        // this.$store.dispatch('getInfoAsync')
+        this.axios.post("/login?email="+this.email+"&password="+this.password )
+          .then(
+            res => {
+              // console.log(res.data.profile.userId)
+              //如果成功则将返回数据存储在state中
+              if (res.data.code === 200) {
+                this.token = res.data.token;
+                window.localStorage.setItem("token", res.data.token);
+                window.localStorage.setItem("userId", res.data.profile.userId);
+
+                //  console.log(this.state.userId)
+                this.loginShow = false;
+                this.fullscreenLoading = true;
+                setTimeout(() => {
+                  this.fullscreenLoading = false;
+                }, 1000);
+                this.loginButtonShow = false;
+                this.loginOutShow = true;
+                this.$store.commit("setLoginIn");
+                this.$store.commit("getUserInfo");
+                const user = [
+                  {
+                    password: this.password,
+                    email: this.email,
+                    loginFun: 'eamil'
+                  }
+                ];
+                localStorage.removeItem("userInfo")
+                  localStorage.setItem("userInfo", JSON.stringify(user))
+                  this.$store.commit('getLikeId')
+                     this.$store.commit('loginRefresh')
+                     this.centerDialogVisible = false
+                    this.$store.commit('setCookies')
+                     this.$store.commit('setI')
+                     this.$store.dispatch('setIAsync')
+              } else {
+                //否则打印错误信息
+
+                this.$message.error("账号或密码错误");
+              }
+            }
+            //400和501状态码捕捉
+          )
+          .catch(error => {
+            //console.log(error.request.status);
+            if (error.request.status === 400) {
+              // console.log("输入类型有误");
+              this.$message({
+                message: "输入类型有误",
+                type: "warning",
+                center: true
+              });
+            } else if (error.request.status === 501) {
+              //  console.log("账号错误");
+              this.$message.error("账号错误");
+            } else {
+              //  console.log(error.request.status);
+              this.$message(error.request.status);
+            }
+          });
+        // this.loginShow = false
+        // this.loginButtonShow = false
+        // this.loginOutShow = true
+      } else {
+        this.$message({
+          message: "账号或密码不能为空",
+          type: "warning",
+          center: true
+        });
+      }
+    }
+    },
+        // 手机登陆
+    loginMb() {
+       //判断用户选择的是什么登陆
+      //如果选择手机登录则执行手机登陆方式
+      if(this.radio === '1'){
+      //根据选择的结果选择登陆方式
+      //不允许输入框为空
+      if (this.cellphone !== "" && this.password !== "") {
+        // this.$store.commit('login',{cellphone :this.cellphone,password: this.password})
+        // this.$store.dispatch('getInfoAsync')
+        this.axios.post(
+          "/login/cellphone?phone=" +
+              this.cellphone +
+              "&password=" +
+              this.password
+          )
+          .then(
+            res => {
+              // console.log(res.data.profile.userId)
+              //如果成功则将返回数据存储在state中
+              if (res.data.code === 200) {
+                this.token = res.data.token;
+                window.localStorage.setItem("token", res.data.token);
+                window.localStorage.setItem("userId", res.data.profile.userId);
+
+                //  console.log(this.state.userId)
+                this.loginShow = false;
+                this.fullscreenLoading = true;
+                setTimeout(() => {
+                  this.fullscreenLoading = false;
+                }, 1000);
+                this.loginButtonShow = false;
+                this.loginOutShow = true;
+                this.$store.commit("setLoginIn");
+                this.$store.commit("getUserInfo");
+                const user = [
+                  {
+                    password: this.password,
+                    cellphone: this.cellphone,
+                    loginFun: 'phone'
+                  }
+                ];
+                localStorage.removeItem("userInfo")
+                  localStorage.setItem("userInfo", JSON.stringify(user))
+                  this.$store.commit('getLikeId')
+                     this.$store.commit('loginRefresh')
+                     this.centerDialogVisible1 = false
+                    this.$store.commit('setCookies')
+                     this.$store.commit('setI')
+                     this.$store.dispatch('setIAsync')
               } else {
                 //否则打印错误信息
 
@@ -442,6 +636,8 @@ export default {
                      this.$store.commit('loginRefresh')
                      this.centerDialogVisible1 = false
                     this.$store.commit('setCookies')
+                     this.$store.commit('setI')
+                     this.$store.dispatch('setIAsync')
               } else {
                 //否则打印错误信息
 
@@ -479,90 +675,6 @@ export default {
       }
     }
     },
-        // 手机登陆
-    loginMb() {
-      //不允许输入框为控股
-      if (this.cellphone !== "" && this.password !== "") {
-        // this.$store.commit('login',{cellphone :this.cellphone,password: this.password})
-        // this.$store.dispatch('getInfoAsync')
-        this.axios.post(
-          "/login/cellphone?phone=" +
-              this.cellphone +
-              "&password=" +
-              this.password
-          )
-          .then(
-            res => {
-              // console.log(res.data.profile.userId)
-              //如果成功则将返回数据存储在state中
-              if (res.data.code === 200) {
-                this.token = res.data.token;
-                window.localStorage.setItem("token", res.data.token);
-                window.localStorage.setItem("userId", res.data.profile.userId);
-
-                //  console.log(this.state.userId)
-                this.loginShow = false;
-                this.fullscreenLoading = true;
-                setTimeout(() => {
-                  this.fullscreenLoading = false;
-                   this.$message({
-              message: "登陆成功，欢迎使用网易云一键打卡",
-              type: "success",
-              center: true
-            });
-                }, 1000);
-                this.loginButtonShow = false;
-                this.loginOutShow = true;
-                this.$store.commit("setLoginIn");
-                this.$store.commit("getUserInfo");
-                const user = [
-                  {
-                    password: this.password,
-                    cellphone: this.cellphone
-                  }
-                ];
-                localStorage.removeItem("userInfo")
-                  localStorage.setItem("userInfo", JSON.stringify(user))
-                  this.$store.commit('getLikeId')
-                     this.$store.commit('loginRefresh')
-                     this.centerDialogVisible = false
-                      this.$store.commit('setCookies')
-              } else {
-                //否则打印错误信息
-
-                this.$message.error("账号或密码错误");
-              }
-            }
-            //400和501状态码捕捉
-          )
-          .catch(error => {
-            //console.log(error.request.status);
-            if (error.request.status === 400) {
-              // console.log("输入类型有误");
-              this.$message({
-                message: "输入类型有误",
-                type: "warning",
-                center: true
-              });
-            } else if (error.request.status === 501) {
-              //  console.log("账号错误");
-              this.$message.error("账号错误");
-            } else {
-              //  console.log(error.request.status);
-              this.$message(error.request.status);
-            }
-          });
-        // this.loginShow = false
-        // this.loginButtonShow = false
-        // this.loginOutShow = true
-      } else {
-        this.$message({
-          message: "账号或密码不能为空",
-          type: "warning",
-          center: true
-        });
-      }
-    },
     //登出
     LoginOut() {
       this.$store.commit("LoginOut"), (this.fullscreenLoading = true);
@@ -577,6 +689,9 @@ export default {
       localStorage.removeItem("login");
       this.$store.commit('loginRefresh')
        this.$store.commit('delCookies')
+       this.$store.commit('setO')
+       this.$store.dispatch('setOAsync')
+      //  window.location.reload(true)
     },
     //检测账号登陆状态
     loginStatus(state) {
@@ -592,15 +707,14 @@ export default {
         this.loginOutShow = true;
       }
     },
-    //邮箱登陆
-    // TODO
 
-    qiandao:throttle(function() {
+
+    qiandao() {
       this.$store.commit("login");
        this.$store.commit('loginRefresh')
             let locl = localStorage.getItem('userId')
             if(locl !==null){
-      this.$axios.post("/daily_signin?type=0").then(res => {
+      this.$axios.post("/daily_signin").then(res => {
      
           if (res.data.code === 200) {
             this.$message({
@@ -608,56 +722,223 @@ export default {
               type: "success",
               center: true
             });
+         this.$store.commit('setQ')
+         this.$store.dispatch('setQAsync')
           }
         })
         .catch(error => {
           if (error.request.status === 400) {
           console.log('哈哈哈哈哈哈，我就不提示你')
+         this.$store.commit('setQ')
+         this.$store.dispatch('setQAsync')
           } else if (error.request.status === 301) {
             this.$message.error("未登录");
+         this.$store.commit('setQ')
+         this.$store.dispatch('setQAsync')
           } else {
-             this.$message("未知错误");
+         this.$message("未知错误");
+         this.$store.commit('setQ')
+         this.$store.dispatch('setQAsync')
           }
         })
       
          this.$axios.post("/daily_signin?type=1")
         .then(res => {
         })
+         .catch(error => {
+          if (error.request.status === 400) {
+          console.log('哈哈哈哈哈哈，我就不提示你')
+          } else if (error.request.status === 301) {
+            console.log("未登录");
+          } else {
+             console.log("未知错误");
+          }
+        })
            }else{
            this.$message.error("未登录")
          }
 
-    }),
-    play(){
+    },
+      play(){
       this.$store.commit('login')
       this.dialogVisible1 = false
       this.palyList =[]
-      if(this.checkList[0] === '日推歌曲' && this.checkList[1] === '我喜欢的音乐'){
+      this.dayId = []
+      this.likeList =[]
+      this.likeId =[]
+     this.likeId = localStorage.getItem('likeId')
+      if(this.checkList.length === 2){
        //获取每日推荐歌曲
+      //  console.log(this.checkList)
+       
        this.$axios.post('/recommend/songs').then(
           res => {
-            this.dayList = res.data.recommend
-            this.dayLength =res.data.recommend.length
-            // console.log(this.dayList[0])
-          }
-        ) .catch(error => {
-            //console.log(error.request.status);
-            if (error.request.status === 301) {
-              // console.log("输入类型有误");
-              this.$message.error("未登陆");
-            } else {
-              //  console.log(error.request.status);
-              this.$message('未知错误，建议重新登陆');
+            
+            //  console.log(res)
+              this.dayLength =res.data.recommend.length
+               this.dayList = res.data.recommend
+            for(var i =0 ; i<=res.data.recommend.length;i++){
+              this.palyList.push(this.dayList[i].id) 
+              this.dayId.push(res.data.recommend[i].album.id)
+            // localStorage.setItem("list", JSON.stringify(this.palyList))
             }
-          })
-          for(var i = 0;i <= 30;i++){
-            let day = this.dayList[i].id 
-            console.log(day)
-            //  this.palyList.push(this.dayList[0].id)
           }
-          
+        )  .catch(  error => {
+            console.log(error)
+          })
+          // /likelist?uid=32953014
+          let locl = localStorage.getItem('userId')
+      this.$axios.post('/likelist?uid='+locl).then(
+        res => {
+          for(var j = 0;j<= res.data.ids.length;j++){
+            this.palyList.push(res.data.ids[j])
+            this.likeList.push(res.data.ids[j])
+          }
+          // console.log(this.palyList)
+          // console.log(this.dayId)
+          // console.log(this.likeList)
+          // console.log(this.likeId)
+            this.$store.commit('setD')
+         this.$store.dispatch('setDAsync')
+           for(let q = 0; q <= this.dayId.length;q++){
+          this.$axios.get('/scrobble?id='+this.dayList[q]+'&sourceid='+this.dayId[q]+'&time=300').then(
+          res =>{
+            console.log(res)
+          }
+        )
+           }
+           for(let p =0 ;p<=this.likeList.length;p++){
+ this.$axios.get('/scrobble?id='+this.likeList[id]+'&sourceid='+this.likeId+'&time=300').then(
+          res =>{
+            console.log(res)
+          }
+        )
+           }
+              // this.$message.error("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次");
+         
+         this.$message("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次"); 
+        }
+      )
+     
+
+      }else {
+        this.palyList =[]
+       //  console.log(this.checkList)
+     let locl = localStorage.getItem('userId')
+     var that = this;
+         this.$axios.post('/likelist?uid='+locl).then(
+        res => {
+          for(var j = 0;j<= res.data.ids.length;j++){
+            this.palyList.push(res.data.ids[j])
+            this.likeList.push(res.data.ids[j])
+          }
+          // console.log(this.palyList)
+          // console.log(this.dayId)
+          // console.log(this.likeList)
+          // console.log(this.likeId)
+            this.$store.commit('setD')
+         this.$store.dispatch('setDAsync')
+           for(let p =0 ;p<=this.likeList.length;p++){
+ this.$axios.get('/scrobble?id='+this.likeList[p]+'&sourceid='+this.likeId+'&time=300').then(
+          res =>{
+            console.log(res)
+          } 
+        )
+           }
+            
+              // this.$message.error("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次");
+            
+             this.$message("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次");  
+            
+        }
+      )
       }
-    } 
+    } ,
+    getQ(){
+      let locl = localStorage.getItem('setQ')
+     this.$store.state.disabledQ = locl
+      setTimeout(() => {
+       if(locl === 'true'){
+        this.$store.state.disabledQ = false
+        localStorage.removeItem('setQ')
+      }else if(locl === 'false'){
+         this.$store.state.disabledQ = false
+         localStorage.removeItem('setQ')
+      }
+        }, 60000);
+    },
+       getD(){
+          let locl = localStorage.getItem('setD')
+     this.$store.state.disabledD = locl
+      setTimeout(() => {
+       if(locl === 'true'){
+        this.$store.state.disabledD = false
+        localStorage.removeItem('setD')
+      }else if(locl === 'false'){
+         this.$store.state.disabledD = false
+         localStorage.removeItem('setD')
+      }
+        }, 60000);
+    },
+       getI(){
+          let locl = localStorage.getItem('setI')
+     this.$store.state.disabledIn = locl
+      setTimeout(() => {
+       if(locl === 'true'){
+        this.$store.state.disabledIn = false
+        localStorage.removeItem('setI')
+      }else if(locl === 'false'){
+         this.$store.state.disabledIn = false
+         localStorage.removeItem('setI')
+      }
+        }, 120000);
+    },
+       getO(){
+          let locl = localStorage.getItem('setO')
+     this.$store.state.disabledOut = locl
+      setTimeout(() => {
+       if(locl === 'true'){
+        this.$store.state.disabledOut = false
+        localStorage.removeItem('setO')
+      }else if(locl === 'false'){
+         this.$store.state.disabledOut = false
+         localStorage.removeItem('setO')
+      }
+        }, 120000);
+    },
+    weTost(){
+      let loclQ = localStorage.getItem('setQ')
+       let loclI = localStorage.getItem('setI')
+        let loclD = localStorage.getItem('setD')
+         let loclO = localStorage.getItem('DsetO')
+      // console.log(locl)
+      if(loclQ !== null){
+         this.$message({
+              message: "检测到您之前使用过，请等待60秒",
+              type: "warning",
+              center: true
+            });
+        // this.$message.error("111");
+      }else if(loclD !== null){
+         this.$message({
+              message: "检测到您之前使用过，请等待60秒",
+              type: "warning",
+              center: true
+            });
+      }else if(loclI !== null){
+         this.$message({
+              message: "检测到您之前使用过，请等待120秒",
+              type: "warning",
+              center: true
+            });
+      }else if(loclO !== null){
+         this.$message({
+              message: "检测到您之前使用过，请等待120秒",
+              type: "warning",
+              center: true
+            });
+      }
+    }
   },
   computed: {
     ...mapMutations([]),
@@ -668,6 +949,11 @@ export default {
     // this.$store.commit('setUserInfo');
     this.loginStatus();
     this.$store.commit("getInfo");
+    this.getQ();
+    this.getD();
+    this.getI();
+    this.getO();
+    this.weTost();
   }
 };
 </script>

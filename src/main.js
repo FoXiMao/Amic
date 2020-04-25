@@ -17,7 +17,7 @@ Vue.use(Vuex)
 Vue.use(ElementUI);
 Vue.use(VueAxios, axios)
 Vue.prototype.$axios = axios
-axios.defaults.baseURL='https://musicapi.citrons.cn/'
+axios.defaults.baseURL='https://musicapi.citrons.cn'
 axios.defaults.withCredentials = true
 
 

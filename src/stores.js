@@ -19,17 +19,17 @@ export default new Vuex.Store({
     token: '',//用户登陆token
     level: '请先登陆',//用户等级
     listenSongs: '请先登陆',//用户听歌数量
-    createTime: '',//用户注册时间
-    backgroundUrl: '',//用户背景图
-    avatarUrl: '',//用户头像
     signature: '请先登陆',//用户个性签名
-    followeds: '',//用户粉丝数量
-    follows: '',//用户关注数量
     cookie: '1',
-    likeId:null
+    likeId:null,
+    disabledQ:false,
+    disabledD:false,
+    disabledIn:false,
+    disabledOut:false,
   },
   //Mutation 用于变更Store中的数据
   mutations: {
+
     login(state) {
       let locl1 = localStorage.getItem('login')
       if (locl1 === '1') {
@@ -55,34 +55,13 @@ export default new Vuex.Store({
         res =>{
 
           state.likeId = res.data.playlist[0].id
-          const likeID = [
-            {
-              likeId: state.likeId,
-            }
-          ];
+        
           localStorage.removeItem("likeId")
-              localStorage.setItem("likeId", JSON.stringify(likeID))
+          window.localStorage.setItem("likeId", res.data.playlist[0].id);
         }
       )
     },
-    getDayList(){
-     axios.post('/recommend/songs').then(
-            res => {
-              this.dayList = res.data.recommend
-              this.dayLength =res.data.recommend.length
-              // console.log(this.dayList[0])
-            }
-          ) .catch(error => {
-              //console.log(error.request.status);
-              if (error.request.status === 301) {
-                // console.log("输入类型有误");
-                this.$message.error("未登陆");
-              } else {
-                //  console.log(error.request.status);
-                this.$message('未知错误，建议重新登陆');
-              }
-            })
-    },
+
     // 获取已登陆的用户信息
     getInfo(state) {
       let locl = localStorage.getItem('userId')
@@ -166,9 +145,11 @@ export default new Vuex.Store({
           localStorage.removeItem('token')
           localStorage.removeItem('user')
           localStorage.removeItem('likeId')
+          localStorage.removeItem('list')
         }
       )
     },
+
     //刷新登陆状态
     loginRefresh(state) {
       axios.post('/login/refresh').then(
@@ -194,7 +175,72 @@ export default new Vuex.Store({
     // 删除cookie
     delCookies(state){
       Cookies.remove('MUSIC_U');
-    }
+    },
+    setQ(state){
+      let locl = localStorage.getItem('setQ')
+      if(locl === null){
+        state.disabledQ =! state.disabledQ
+        localStorage.setItem('setQ', state.disabledQ)
+      }else if(locl === 'true'){
+        state.disabledQ = false
+        localStorage.removeItem('setQ')
+        localStorage.setItem('setQ', state.disabledQ)
+      }else if(locl === 'false'){
+        state.disabledQ = true
+        localStorage.removeItem('setQ')
+        localStorage.setItem('setQ', state.disabledQ)
+      }
+    },
+    setD(state){
+      // state.disabledD =true
+      let locl = localStorage.getItem('setD')
+      if(locl === null){
+        state.disabledD =! state.disabledD
+        localStorage.setItem('setD', state.disabledD)
+      }else if(locl === 'true'){
+        state.disabledD = false
+        localStorage.removeItem('setD')
+        localStorage.setItem('setD', state.disabledD)
+      }else if(locl === 'false'){
+        state.disabledD = true
+        localStorage.removeItem('setD')
+        localStorage.setItem('setD', state.disabledD)
+      }
+    },
+    setI(state){
+      // state.disabledIn =true
+      let locl = localStorage.getItem('setI')
+
+      if(locl === null){
+        state.disabledIn =! state.disabledIn
+        localStorage.setItem('setI', state.disabledIn)
+      }else if(locl === 'true'){
+        state.disabledIn = false
+        localStorage.removeItem('setI')
+        localStorage.setItem('setI', state.disabledIn)
+      }else if(locl === 'false'){
+        state.disabledIn = true
+        localStorage.removeItem('setI')
+        localStorage.setItem('setI', state.disabledIn)
+      }
+    },
+    setO(state){
+      // state.disabledOut =true
+      let locl = localStorage.getItem('setO')
+
+      if(locl === null){
+        state.disabledOut =! state.disabledOut
+        localStorage.setItem('setO', state.disabledOut)
+      }else if(locl === 'true'){
+        state.disabledOut = false
+        localStorage.removeItem('setO')
+        localStorage.setItem('setO', state.disabledOut)
+      }else if(locl === 'false'){
+        state.disabledOut = true
+        localStorage.removeItem('setO')
+        localStorage.setItem('setO', state.disabledOut)
+      }
+    },
   },
   //Action用于处理异步任务
   actions: {
@@ -202,6 +248,26 @@ export default new Vuex.Store({
       setTimeout(() => {
         context.commit('getUserInfo')
       }, 800)
+    },
+    setQAsync(context) {
+      setTimeout(() => {
+        context.commit('setQ')
+      }, 60000)
+    },
+    setDAsync(context) {
+      setTimeout(() => {
+        context.commit('setD')
+      }, 60000)
+    },
+    setIAsync(context) {
+      setTimeout(() => {
+        context.commit('setI')
+      }, 120000)
+    },
+    setOAsync(context) {
+      setTimeout(() => {
+        context.commit('setO')
+      }, 120000)
     },
   },
   //Getter用于对Store中的数据进行加工处理形成新的数据
