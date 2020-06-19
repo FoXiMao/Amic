@@ -135,11 +135,7 @@
       <el-divider></el-divider>
       <span>Q:为什么只刷了一部分或者没刷</span>
       <br />
-      <span>A:由于网易云对于高频IP限制的非常严格，所以会有部分请求失败，这是正常现象</span>
-       <el-divider></el-divider>
-       <span>Q:我能刷其他的收藏歌单吗？</span>
-      <br />
-      <span>A:如果有这个需求以后会增加这个功能 = =</span>
+      <span>A:网易云数据一般下午两点更新</span>
        <el-divider></el-divider>
       <span>开发者：Citrons</span>
       <el-divider></el-divider>
@@ -800,14 +796,17 @@ export default {
           // console.log(this.likeId)
             this.$store.commit('setD')
          this.$store.dispatch('setDAsync')
-           for(let q = 0; q <= this.dayId.length;q++){
+         if(this.palyList.length >=500){
+           for(var q = 0; q <= this.dayId.length;q++){
+           
           this.$axios.get('/scrobble?id='+this.dayList[q]+'&sourceid='+this.dayId[q]+'&time=300').then(
           res =>{
             console.log(res)
           }
         )
            }
-           for(let p =0 ;p<=this.likeList.length;p++){
+           for(var p =0 ;p<=this.likeList.length;p++){
+            
  this.$axios.get('/scrobble?id='+this.likeList[id]+'&sourceid='+this.likeId+'&time=300').then(
           res =>{
             console.log(res)
@@ -815,8 +814,25 @@ export default {
         )
            }
               // this.$message.error("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次");
-         
+         }else if(this.palyList.length <500){
+            for(var q = 0; q <= this.dayId.length;q++){
+          this.$axios.get('/scrobble?id='+this.dayList[q]+'&sourceid='+this.dayId[q]+'&time=300').then(
+          res =>{
+            console.log(res)
+          }
+        )
+           }
+           for(var p =0 ;p<=this.likeList.length;p++){
+        this.$axios.get('/scrobble?id='+this.likeList[p]+'&sourceid='+this.likeId+'&time=300').then(
+          res =>{
+            console.log(res)
+          }
+        )
+         }
+            
+         }
          this.$message("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次"); 
+            
         }
       )
      
@@ -838,10 +854,10 @@ export default {
           // console.log(this.likeId)
             this.$store.commit('setD')
          this.$store.dispatch('setDAsync')
-           for(let p =0 ;p<=this.likeList.length;p++){
+           for(var p =0 ;p<=this.likeList.length;p++){
  this.$axios.get('/scrobble?id='+this.likeList[p]+'&sourceid='+this.likeId+'&time=300').then(
           res =>{
-            console.log(res)
+            
           } 
         )
            }
@@ -849,7 +865,6 @@ export default {
               // this.$message.error("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次");
             
              this.$message("当前可获取歌曲数量:"+this.palyList.length+",如果您的歌曲数较少，请多点几次");  
-            
         }
       )
       }
@@ -1008,5 +1023,26 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.el-button {
+    display: inline-block;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #dcdfe6;
+    color: #606266;
+    -webkit-appearance: none;
+    text-align: center;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    outline: 0;
+    /* margin: 0; */
+    -webkit-transition: .1s;
+    transition: .1s;
+    font-weight: 500;
+    padding: 12px 20px;
+    font-size: 14px;
+    border-radius: 4px;
 }
 </style>

@@ -2,6 +2,11 @@
 
 > 基于Vue开发的网易云刷歌项目，一键刷听歌量300+，刷等级必备！
 
+
+### 2020/06/19
+ 已将接口改为http://localhost:3000
+ 请在本地运行https://github.com/Binaryify/NeteaseCloudMusicApi
+ 因为服务器太拉垮了，带不动API
 ## Build Setup
 
 ``` bash
